@@ -406,7 +406,104 @@ function payWithMobileMoney() {
         });
         handler.openImoMobileMoney();
     }
+    </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tanoso AAMUSTED Hostel Portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- 1. BOOKING FORM SECTION -->
+    <div class="booking-card">
+        <h2>Book Your Room</h2>
+        <form id="bookingForm" action="https://formspree.io/f/YOUR_FORMSPREE_ID" method="POST">
+            
+            <div class="form-group">
+                <label for="fullName">Full Name:</label>
+                <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="phoneNumber">Phone Number (MTN / Telecel):</label>
+                <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="e.g. 024xxxxxxx or 020xxxxxxx" required>
+            </div>
+
+            <!-- Single choice options for rooms -->
+            <div class="form-group">
+                <label>Select Room Type:</label>
+                
+                <div class="room-option">
+                    <input type="radio" id="executive" name="roomType" value="Executive" data-price="2000" required>
+                    <label for="executive">1-In-A-Room / Executive — <strong>GH₵ 2,000</strong> (Spacious & AC)</label>
+                </div>
+
+                <div class="room-option">
+                    <input type="radio" id="single" name="roomType" value="Single" data-price="1200" checked>
+                    <label for="single">Single Room — <strong>GH₵ 1,200</strong> (Private bathroom)</label>
+                </div>
+
+                <div class="room-option">
+                    <input type="radio" id="shared" name="roomType" value="Shared" data-price="800">
+                    <label for="shared">2-In-A-Room (Shared) — <strong>GH₵ 800</strong> (Affordable space)</label>
+                </div>
+            </div>
+
+            <button type="button" id="payBtn" onclick="payWithMoMo()">Pay with Mobile Money & Book</button>
+        </form>
+    </div>
+
+    <!-- Paystack Inline JS Script -->
+    <script src="https://js.paystack.co/v1/inline.js"></script>
+    <script>
+    function payWithMoMo() {
+        const fullName = document.getElementById('fullName').value;
+        const phone = document.getElementById('phoneNumber').value;
+        const selectedRoom = document.querySelector('input[name="roomType"]:checked');
+        
+        if (!fullName || !phone) {
+            alert('Please fill in your name and phone number.');
+            return;
+        }
+
+        if (!selectedRoom) {
+            alert('Please select a room type.');
+            return;
+        }
+
+        const roomName = selectedRoom.value;
+        const amountInCedis = parseInt(selectedRoom.getAttribute('data-price'));
+        const amountInPesewas = amountInCedis * 100;
+
+        let handler = PaystackPop.setup({
+            key: 'pk_live_your_actual_paystack_public_key', // Replace with your live public key
+            email: 'hostelbooking@portal.com',
+            amount: amountInPesewas,
+            currency: 'GHS',
+            channels: ['mobile_money'],
+            metadata: {
+                custom_fields: [
+                    { display_name: "Full Name", variable_name: "full_name", value: fullName },
+                    { display_name: "Phone Number", variable_name: "phone_number", value: phone },
+                    { display_name: "Room Type", variable_name: "room_type", value: roomName }
+                ]
+            },
+            callback: function(response) {
+                alert('Payment successful! Reference: ' + response.reference);
+                document.getElementById('bookingForm').submit();
+            },
+            onClose: function() {
+                alert('Payment window was closed.');
+            }
+        });
+        handler.openImoMobileMoney();
+    }
     </script>
+</body>
+</html>
+    
 </body>
 </html>
     
