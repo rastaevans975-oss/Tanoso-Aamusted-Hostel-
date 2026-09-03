@@ -95,6 +95,112 @@ function payWithMobileMoney() {
     });
     handler.openImoMobileMoney();
 }
-</script>
+</script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tanoso AAMUSTED Hostel Portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="booking-card">
+        <h2>Book Your Room</h2>
+        <!-- Replace YOUR_FORMSPREE_ID with your form endpoint if using Formspree -->
+        <form id="bookingForm" action="https://formspree.io/f/YOUR_FORMSPREE_ID" method="POST">
+            
+            <div class="form-group">
+                <label for="fullName">Full Name:</label>
+                <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="studentId">Student ID:</label>
+                <input type="text" id="studentId" name="studentId" placeholder="Enter your ID number" required>
+            </div>
+
+            <div class="form-group">
+                <label for="phoneNumber">Phone Number (MTN / Telecel):</label>
+                <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="e.g. 024xxxxxxx or 020xxxxxxx" required>
+            </div>
+
+            <div class="form-group">
+                <label for="roomType">Select Room Type:</label>
+                <select id="roomType" name="roomType" required>
+                    <option value="Executive" data-price="2000">1-In-A-Room / Executive - GH₵ 2,000</option>
+                    <option value="Single" data-price="1200" selected>Single Room - GH₵ 1,200</option>
+                    <option value="Shared" data-price="800">2-In-A-Room (Shared) - GH₵ 800</option>
+                </select>
+            </div>
+
+            <button type="button" id="payBtn" onclick="payWithMoMo()">Pay with Mobile Money & Book</button>
+        </form>
+    </div>
+
+    <!-- Paystack Inline JS Script -->
+    <script src="https://js.paystack.co/v1/inline.js"></script>
+    <script>
+    function payWithMoMo() {
+        const fullName = document.getElementById('fullName').value;
+        const studentId = document.getElementById('studentId').value;
+        const phone = document.getElementById('phoneNumber').value;
+        const roomSelect = document.getElementById('roomType');
+        
+        if (!fullName || !studentId || !phone) {
+            alert('Please fill in all the required fields before proceeding.');
+            return;
+        }
+
+        const selectedOption = roomSelect.options[roomSelect.selectedIndex];
+        const roomName = selectedOption.value;
+        const amountInCedis = parseInt(selectedOption.getAttribute('data-price'));
+        const amountInPesewas = amountInCedis * 100; // Paystack takes amounts in pesewas
+
+        let handler = PaystackPop.setup({
+            key: 'pk_live_your_actual_paystack_public_key', // Replace with your live public key
+            email: 'hostelbooking@portal.com',
+            amount: amountInPesewas,
+            currency: 'GHS',
+            channels: ['mobile_money'], // Restricts payment specifically to Mobile Money networks (MTN, Telecel, AT)
+            metadata: {
+                custom_fields: [
+                    {
+                        display_name: "Full Name",
+                        variable_name: "full_name",
+                        value: fullName
+                    },
+                    {
+                        display_name: "Student ID",
+                        variable_name: "student_id",
+                        value: studentId
+                    },
+                    {
+                        display_name: "Phone Number",
+                        variable_name: "phone_number",
+                        value: phone
+                    },
+                    {
+                        display_name: "Room Type",
+                        variable_name: "room_type",
+                        value: roomName
+                    }
+                ]
+            },
+            callback: function(response) {
+                alert('Payment successful! Reference: ' + response.reference);
+                // Submits the form data to Formspree / Backend once payment clears
+                document.getElementById('bookingForm').submit();
+            },
+            onClose: function() {
+                alert('Payment window was closed.');
+            }
+        });
+        handler.openImoMobileMoney();
+    }
+    </script>
+</body>
+</html>
+    
 </body>
 </html>
