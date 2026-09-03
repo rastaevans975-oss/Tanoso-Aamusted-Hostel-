@@ -56,5 +56,45 @@
         </div>
     </div>
     <p>Find and book your accommodation easily.</p>
+    <script src="https://js.paystack.co/v1/inline.js"></script>
+<script>
+function payWithMobileMoney() {
+    let handler = PaystackPop.setup({
+        key: 'pk_live_your_actual_paystack_public_key', // Use your live public key from Paystack Dashboard
+        email: 'hostelbooking@portal.com', // Required by Paystack (can be a dummy or user email)
+        amount: 120000, // Amount in pesewas (GH₵ 1,200.00 = 120000)
+        currency: 'GHS',
+        channels: ['mobile_money'], // Restricts payment channels strictly to Mobile Money
+        metadata: {
+            custom_fields: [
+                {
+                    display_name: "Full Name",
+                    variable_name: "full_name",
+                    value: document.getElementById('fullName').value
+                },
+                {
+                    display_name: "Student ID",
+                    variable_name: "student_id",
+                    value: document.getElementById('studentId').value
+                },
+                {
+                    display_name: "Phone Number",
+                    variable_name: "phone_number",
+                    value: document.getElementById('phoneNumber').value
+                }
+            ]
+        },
+        callback: function(response) {
+            // This runs after the customer successfully approves the MoMo prompt on their phone
+            alert('Payment complete! Reference: ' + response.reference);
+            document.getElementById('bookingForm').submit();
+        },
+        onClose: function() {
+            alert('Payment window closed.');
+        }
+    });
+    handler.openImoMobileMoney();
+}
+</script>
 </body>
 </html>
